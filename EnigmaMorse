@@ -1,0 +1,51 @@
+#include <avr/pgmspace.h>
+#include <EEPROM.h>
+#include <avr/eeprom.h>
+
+#define PIN 13
+#define PINON 1
+#define PINOFF 0
+
+void LightOn()
+{
+  digitalWrite(PIN, PINON);
+}
+
+void LightOff()
+{
+  digitalWrite(PIN, PINOFF);
+}
+
+void setup()
+{
+  Serial.begin(9600);
+
+  //init Morse sender
+  pinMode(PIN, OUTPUT);
+  LightOff();
+
+  //init Enigma
+  initEnigmaWheels();
+  setupEnigmaDefaultM4();
+  ShowRotors();
+}
+
+void loop()
+{
+  char clearc;
+  char cryptoc;
+
+  if (Serial.available())
+  {
+    clearc = Serial.read();
+    cryptoc = EncodeSerial(clearc);
+
+    if (cryptoc != 0)
+    {
+      QueueMorse(cryptoc);
+    }
+  }
+
+  //if there are any characters queued to send out, this will flash them, call often
+  SendMorse();
+}
